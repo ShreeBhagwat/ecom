@@ -1,5 +1,6 @@
 import 'package:ecom/data/modals/products.dart';
 import 'package:ecom/data/repos/products_repo.dart';
+import 'package:ecom/ui/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/modals/category.dart';
@@ -35,6 +36,17 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
           'Prodcuts',
           style: TextStyle(color: Colors.black),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const CartScreen(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.shopping_cart))
+        ],
       ),
       body: Column(
         children: [
