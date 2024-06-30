@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:ecom/data/modals/products.dart';
 import 'package:ecom/data/repos/products_repo.dart';
+import 'package:ecom/utils/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -55,7 +58,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     SizedBox(
                       width: 200,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if (product != null) {
+                            cartList.add(product!);
+                            log(cartList.length.toString());
+                          } else {
+                            return;
+                          }
+                        },
                         child: Text('Add To Cart'),
                       ),
                     )
