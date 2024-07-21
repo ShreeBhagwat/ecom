@@ -17,4 +17,17 @@ class CategoryModel {
       url: json['url'],
     );
   }
+
+  // create a copywith function
+  CategoryModel copyWith({
+    String? slug,
+    String? name,
+    String? url,
+  }) {
+    return CategoryModel(
+      slug: slug ?? this.slug,
+      name: name ?? this.name,
+      url: url ?? this.url,
+    );
+  }
 }
