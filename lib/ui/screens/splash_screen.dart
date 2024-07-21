@@ -1,43 +1,37 @@
+import 'package:ecom/providers/category_provider.dart';
+import 'package:ecom/providers/products_provider.dart';
 import 'package:ecom/ui/screens/all_products_screen.dart';
 import 'package:ecom/data/repos/products_repo.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/modals/products.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  final ProductsRepo _productsRepo = ProductsRepo();
-
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    getProducts();
-  }
-
-  Future getProducts() async {
-    await _productsRepo.getProducts(null).then((productsList) async {
-      await _productsRepo.getCategoryList().then((categoryList) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => AllProductsScreen(
-              productsList: productsList,
-              categoryList: categoryList,
-            ),
-          ),
-        );
-      
-      });
+    Future.microtask(() async{
+     await  getProducts();
     });
   }
 
-  Future getCategoryList() async {
-    await _productsRepo.getCategoryList();
+  Future getProducts() async {
+    await ref.read(productsProvider.notifier).getProductsList(null);
+    await ref.read(categoryProvider.notifier).getCategoryList().then((value) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const AllProductsScreen(),
+        ),
+      );
+    });
   }
 
   @override

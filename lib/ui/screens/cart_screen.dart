@@ -1,28 +1,24 @@
-import 'package:ecom/utils/constant.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/cart_provider.dart';
 
-class CartScreen extends StatefulWidget {
+class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
 
   @override
-  State<CartScreen> createState() => _CartScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cartNotifier = ref.watch(cartProvider);
 
-class _CartScreenState extends State<CartScreen> {
-  @override
-  Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
         appBar: AppBar(
           title: const Text('Cart'),
         ),
-        body: cartList.isNotEmpty
+        body: cartNotifier.isNotEmpty
             ? ListView.builder(
-                itemCount: cartList.length,
+                itemCount: cartNotifier.length,
                 itemBuilder: (context, index) {
-                  final product = cartList[index];
+                  final product = cartNotifier[index];
                   return Card(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -67,8 +63,9 @@ class _CartScreenState extends State<CartScreen> {
                               ),
                               IconButton(
                                   onPressed: () {
-                                    cartList.removeAt(index);
-                                    setState(() {});
+                                    ref
+                                        .read(cartProvider.notifier)
+                                        .removeFromCart(product);
                                   },
                                   icon: const Icon(
                                     Icons.delete,

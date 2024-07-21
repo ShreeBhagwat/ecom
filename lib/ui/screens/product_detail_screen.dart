@@ -1,76 +1,74 @@
-import 'dart:developer';
-
 import 'package:ecom/data/modals/products.dart';
-import 'package:ecom/data/repos/products_repo.dart';
-import 'package:ecom/utils/constant.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ProductDetailScreen extends StatefulWidget {
+import '../../providers/cart_provider.dart';
+import '../../providers/id_product_provider.dart';
+
+class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({super.key, required this.productId});
   final String productId;
 
   @override
-  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    AsyncValue<Products> product = ref.watch(productsFromIdProvider(productId));
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Product Detail'),
+      ),
+      body: product.when(
+        data: (product) {
+          return ProductsDetailsWidget(product: product);
+        },
+        error: (error, trace) {
+          return Center(
+            child: Text('Error: $error'),
+          );
+        },
+        loading: () {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
+    );
+  }
 }
 
-class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  Products? product;
+class ProductsDetailsWidget extends ConsumerWidget {
+  const ProductsDetailsWidget({
+    super.key,
+    required this.product,
+  });
+
+  final Products product;
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getProductDetail();
-  }
-
-  Future getProductDetail() async {
-    final ProductsRepo _productsRepo = ProductsRepo();
-    product = await _productsRepo.getProductFromId(productId: widget.productId);
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('Product Detail'),
-        ),
-        body: product == null
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: Colors.amber,
-                ),
-              )
-            : Center(
-                child: Column(
-                  children: [
-                    Text(product!.title!),
-                    Image.network(
-                      product!.images!.first,
-                      width: 200,
-                      fit: BoxFit.cover,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(product!.description!),
-                    ),
-                    SizedBox(
-                      width: 200,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (product != null) {
-                            cartList.add(product!);
-                            log(cartList.length.toString());
-                          } else {
-                            return;
-                          }
-                        },
-                        child: Text('Add To Cart'),
-                      ),
-                    )
-                  ],
-                ),
-              ));
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Center(
+      child: Column(
+        children: [
+          Text(product.title!),
+          Image.network(
+            product.images!.first,
+            width: 200,
+            fit: BoxFit.cover,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(product.description!),
+          ),
+          SizedBox(
+            width: 200,
+            child: ElevatedButton(
+              onPressed: () {
+                ref.read(cartProvider.notifier).addToCart(product);
+              },
+              child: const Text('Add To Cart'),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

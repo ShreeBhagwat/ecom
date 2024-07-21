@@ -1,34 +1,19 @@
-import 'package:ecom/data/modals/products.dart';
-import 'package:ecom/data/repos/products_repo.dart';
+import 'package:ecom/providers/products_provider.dart';
 import 'package:ecom/ui/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../../data/modals/category.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/category_provider.dart';
 import '../widgets/products_row_widget.dart';
 
-class AllProductsScreen extends StatefulWidget {
-  const AllProductsScreen(
-      {super.key, required this.productsList, required this.categoryList});
-
-  final List<Products> productsList;
-  final List<CategoryModel> categoryList;
+class AllProductsScreen extends ConsumerWidget {
+  const AllProductsScreen({super.key});
 
   @override
-  State<AllProductsScreen> createState() => _AllProductsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final productsNotifier = ref.watch(productsProvider);
+    final categoryNotifier = ref.watch(categoryProvider);
+  
 
-class _AllProductsScreenState extends State<AllProductsScreen> {
-  List<Products>? productsList;
-  final ProductsRepo _productsRepo = ProductsRepo();
-  bool isLoading = false;
-  @override
-  void initState() {
-    super.initState();
-    productsList = widget.productsList;
-  }
-
-  @override
-  Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
@@ -45,40 +30,36 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                   ),
                 );
               },
-              icon: Icon(Icons.shopping_cart))
+              icon: const Icon(Icons.shopping_cart))
         ],
       ),
       body: Column(
         children: [
           SizedBox(
-            height: 50,
-            child: ListView.builder(
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        isLoading = true;
-                      });
-                      productsList = await _productsRepo
-                          .getProducts(widget.categoryList[index].slug);
-                      setState(() {
-                        isLoading = false;
-                      });
-                    },
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                          child: Text(widget.categoryList[index].name),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                itemCount: widget.categoryList.length,
-                scrollDirection: Axis.horizontal),
-          ),
-          isLoading
+              height: 50,
+              child: categoryNotifier.categoryList!.isNotEmpty
+                  ? ListView.builder(
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () async {
+                            ref.read(productsProvider.notifier).getProductsList(
+                                categoryNotifier.categoryList![index].slug);
+                          },
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                    categoryNotifier.categoryList![index].name),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      itemCount: categoryNotifier.categoryList!.length,
+                      scrollDirection: Axis.horizontal)
+                  : const Text('No Categories Found')),
+          productsNotifier.isLoading
               ? const Padding(
                   padding: EdgeInsets.only(top: 100.0),
                   child: Center(
@@ -88,9 +69,10 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
               : SizedBox(
                   height: height - 170,
                   child: ListView.separated(
-                    itemCount: productsList!.length,
+                    itemCount: productsNotifier.productsList!.length,
                     itemBuilder: (context, index) {
-                      final currentProduct = productsList![index];
+                      final currentProduct =
+                          productsNotifier.productsList![index];
                       return ProductsRow(currentProduct: currentProduct);
                     },
                     separatorBuilder: (context, index) => const Divider(),

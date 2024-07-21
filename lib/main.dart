@@ -1,8 +1,9 @@
 import 'package:ecom/ui/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const Ecom());
+  runApp(const ProviderScope(child: Ecom()));
 }
 
 class Ecom extends StatelessWidget {

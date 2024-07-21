@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:ecom/networking/api_endpoints.dart';
 import 'package:ecom/networking/dio_client.dart';
 import 'package:ecom/data/modals/products.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../modals/category.dart';
 
@@ -61,3 +62,5 @@ class ProductsRepo {
     }
   }
 }
+
+final productsRepoProvider = Provider((ref) => ProductsRepo());
